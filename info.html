@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Section</title>
+
+    <!-- GOOGLE FONTS -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Lora:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            background: #FFFFFF;
+            font-family: 'Lora', serif;
+        }
+
+        /* ================= BLOG SECTION ================= */
+        .blog-section {
+            /* padding: 80px 20px; */
+            overflow: hidden;
+        }
+
+        .blog-wrapper {
+            max-width: 1300px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 50px;
+        }
+
+        /* ✅ FIX: LEFT BLOGS GRID (HORIZONTAL) */
+        #blog-left {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        /* ================= LEFT BLOGS ================= */
+        .blog-left-item {
+            margin-bottom: 0;
+            /* FIX: remove vertical stacking force */
+        }
+
+        .blog-left-item img {
+            width: 100%;
+            border-radius: 20px;
+            margin-bottom: 14px;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .blog-meta {
+            font-family: 'Lora', serif;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .blog-meta .author {
+            color: #333333;
+        }
+
+        .blog-meta .date {
+            color: #F4C542;
+        }
+
+        .blog-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 25px;
+            font-weight: 600;
+            color: #2B2B2B;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .blog-excerpt {
+            font-family: 'Lora', serif;
+            font-size: 14px;
+            font-weight: 400;
+            color: #333333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .blog-readmore {
+            font-family: 'Lora', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #3CB8A9;
+            text-decoration: underline;
+            display: inline-block;
+        }
+
+        /* ================= RIGHT BLOGS ================= */
+        .blog-right-item {
+            display: flex;
+            gap: 14px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .blog-right-item img {
+            width: 90px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        .blog-right-content {
+            flex: 1;
+        }
+
+        .blog-right-content .blog-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 991px) {
+            .blog-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            /* ✅ Mobile: left blogs stack */
+            #blog-left {
+                grid-template-columns: 1fr;
+            }
+
+            .blog-right-item {
+                flex-direction: column;
+            }
+
+            .blog-right-item img {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="blog-section">
+        <div class="blog-wrapper">
+
+            <!-- LEFT BLOGS -->
+            <div id="blog-left"></div>
+
+            <!-- RIGHT RELATED BLOGS -->
+            <div id="blog-right"></div>
+
+        </div>
+    </section>
+
+    <script>
+        const API_URL = "https://inunity.ahaanmedia.com/wp-json/wp/v2/posts?_embed";
+
+        fetch(API_URL)
+            .then(res => res.json())
+            .then(posts => {
+                const left = document.getElementById("blog-left");
+                const right = document.getElementById("blog-right");
+
+                posts.forEach((post, index) => {
+
+                    const img = post._embedded?.["wp:featuredmedia"]
+                        ? post._embedded["wp:featuredmedia"][0].source_url
+                        : "https://via.placeholder.com/600x400";
+
+                    const author = post._embedded?.author?.[0]?.name || "admin";
+
+                    const date = new Date(post.date).toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric"
+                    });
+
+                    const excerpt = post.excerpt.rendered
+                        .replace(/<[^>]*>?/gm, '')
+                        .substring(0, 140) + "...";
+
+                    /* LEFT SIDE BLOGS (2) */
+                    if (index < 2) {
+                        left.innerHTML += `
+                        <div class="blog-left-item">
+                            <img src="${img}" alt="">
+                            <div class="blog-meta">
+                                <span class="author">By ${author}</span> |
+                                <span class="date">${date}</span>
+                            </div>
+                            <div class="blog-title">${post.title.rendered}</div>
+                            <div class="blog-excerpt">${excerpt}</div>
+                            <a href="${post.link}" class="blog-readmore">Read More</a>
+                        </div>
+                        `;
+                    }
+
+                    /* RIGHT SIDE RELATED BLOGS */
+                    if (index >= 2 && index < 6) {
+                        right.innerHTML += `
+                        <div class="blog-right-item">
+                            <img src="${img}" alt="">
+                            <div class="blog-right-content">
+                                <div class="blog-meta">
+                                    <span class="author">By ${author}</span> |
+                                    <span class="date">${date}</span>
+                                </div>
+                                <div class="blog-title">${post.title.rendered}</div>
+                            </div>
+                        </div>
+                        `;
+                    }
+                });
+            });
+    </script>
+
+</body>
+
+</html>
